@@ -18,11 +18,6 @@ Hint Constructors Permutation.
 Hint Unfold LibListZ.length.
 Ltac auto_tilde ::= rew_list in *; eauto with maths.
 
-Lemma app_is_app : LibList.app = List.app.
-Admitted.
-Lemma rev_is_rev : rev = List.rev.
-Admitted.
-
 Definition Buf (L1 L2 : list int) gap b :=
   Hexists l r Ljunk buf,
     b ~> `{ buf' := buf;
@@ -89,7 +84,6 @@ Proof.
     { apply~ index_of_inbound. unfold LibListZ.length.
       auto_tilde. }
     destruct L1. { false~. }
-    Check Buf_close.
     destruct (last_case Ljunk) as [|HH].
     { subst Ljunk.
       xchange~ (Buf_close b gap). unfolds~ LibListZ.length.
@@ -136,8 +130,7 @@ Proof.
       rewrite read_middle; swap 1 2.
       { unfolds~ LibListZ.length. }
       rewrite~ update_middle. unfolds~ LibListZ.length. }
-    { Check Buf_close.
-      xchange~ (Buf_close b gap (Ljunk' & z) (z :: L1)).
+    { xchange~ (Buf_close b gap (Ljunk' & z) (z :: L1)).
       unfolds~ LibListZ.length.
       rewrite~ update_middle; swap 1 2.
       { unfolds~ LibListZ.length. }
