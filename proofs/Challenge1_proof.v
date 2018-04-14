@@ -2,7 +2,7 @@ Set Implicit Arguments.
 (* Load the CFML library. *)
 Require Import CFML.CFLib.
 (* Load the examples CF definitions. *)
-Require Import PairInsertionSort_ml.
+Require Import Challenge1_ml.
 
 Require Import TLC.LibInt TLC.LibTactics.
 Require Import TLC.LibListZ.
