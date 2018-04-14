@@ -13,3 +13,4 @@ all:
 clean:
 	@ ocamlbuild $(OCAMLBUILD_FLAGS) -clean
 	@ rm -f *~
+	@ rm -f $(OCAMLBUILD_TARGETS)
