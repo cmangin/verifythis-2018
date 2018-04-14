@@ -152,7 +152,32 @@ Lemma insert_spec : forall b x L1 L2 (gap:int),
   app insert [b x]
     PRE (b ~> Buf L1 L2 gap \* \[gap > 0])
     POST (fun (tt:unit) => b ~> Buf (x :: L1) L2 (gap - 1)).
-Admitted.
+Proof.
+  intros. xcf.
+
+  xpull.
+  intros Hgap.
+
+  xopen b.
+  xpull.
+  intros l r ljunk buf ?.
+  unpack.
+  xapps. xapps.
+  xrets.
+  xif.
+  - xfail. math.
+  - destruct ljunk; only 1: false~.
+    xapps. xapps.
+    xapps.
+    { apply~ index_of_inbound.
+      unfold LibListZ.length. auto_tilde. }
+    xapps. xapps.
+    xchange~ (Buf_close b (gap - 1) (ljunk));
+    auto_tilde.
+    rewrite~ update_middle.
+    unfold LibListZ.length.
+    auto_tilde.
+Qed.
 
 Lemma delete_spec : forall b L1 L2 gap,
   app delete [b]
@@ -162,4 +187,20 @@ Lemma delete_spec : forall b L1 L2 gap,
       | nil => b ~> Buf L1 L2 gap
       | x :: L1' => b ~> Buf L1' L2 (gap + 1)
       end).
-Admitted.
+Proof.
+  intros. xcf.
+  xopen b.
+  xpull.
+  intros l r ljunk buf ?.
+  unpack.
+  xapps. xrets.
+  xif.
+  - xapps. xapps.
+    destruct L1; only 1: false~.
+    rew_list in *.
+    xchange~ (Buf_close b (gap + 1) (z :: ljunk)).
+    math.
+  - xrets.
+    assert (L1 = nil) as -> by apply~ length_zero_inv.
+    xclose~ b.
+Qed.
