@@ -11,6 +11,13 @@ let left (b: t) =
     b.buf.(b.r) <- b.buf.(b.l)
   )
 
+let right (b: t) =
+  if b.r <> Array.length b.buf then (
+    b.buf.(b.l) <- b.buf.(b.r);
+    b.l <- b.l + 1;
+    b.r <- b.r + 1
+  )
+
 let insert (b: t) (x: int) =
   if b.l = b.r then assert false
   else (
