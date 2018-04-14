@@ -11,3 +11,8 @@ let docount (count : int array) =
     done;
     count.(n) <- count.(n) + 1
   done
+
+let count (len: int) =
+  let a = Array.make (len + 1) 0 in
+  docount a;
+  a.(len)
