@@ -145,14 +145,11 @@ Proof.
   - destruct ljunk; only 1: false~.
     xapps. xapps.
     xapps.
-    { apply~ index_of_inbound.
-      unfold LibListZ.length. auto_tilde. }
+    { apply~ index_of_inbound. }
     xapps. xapps.
     xchange~ (Buf_close b (gap - 1) (ljunk));
     auto_tilde.
     rewrite~ update_middle.
-    unfold LibListZ.length.
-    auto_tilde.
 Qed.
 
 Lemma delete_spec : forall b L1 L2 gap,
