@@ -38,7 +38,8 @@ COQINCLUDE := \
 SOURCES := \
 	pairInsertionSort.ml \
 	pairInsertionSort_funs.ml \
-	challenge1.ml
+	challenge1.ml \
+	challenge2.ml \
 
 CF := $(PWD)/_cf
 

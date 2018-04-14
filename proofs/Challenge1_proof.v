@@ -15,7 +15,6 @@ Open Scope Z_scope.
 
 Hint Constructors LocallySorted.
 Hint Constructors Permutation.
-Hint Unfold LibListZ.length.
 Ltac auto_tilde ::= try unfold LibListZ.length in *; rew_list in *; eauto with maths.
 
 Definition Buf (L1 L2 : list int) gap b :=
