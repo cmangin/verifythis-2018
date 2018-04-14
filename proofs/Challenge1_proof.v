@@ -34,6 +34,38 @@ Definition Buf (L1 L2 : list int) gap b :=
       r = l + gap
     ].
 
+  Lemma Buf_open : forall b L1 L2 gap,
+    b ~> Buf L1 L2 gap ==>
+  Hexists l r Ljunk buf,
+    b ~> `{ buf' := buf;
+            l' := (l:int);
+            r' := (r:int) } \*
+    buf ~> Array (rev L1 ++ Ljunk ++ L2) \*
+    \[
+      length L1 = l /\
+      length Ljunk = gap /\
+      r = l + gap
+    ].
+  Proof using. intros. xunfolds~ Buf. Qed.
+
+  Lemma Buf_close : forall b L1 L2 Ljunk buf l r gap,
+    length L1 = l ->
+    length Ljunk = gap ->
+    r = l + gap ->
+    buf ~> Array (rev L1 ++ Ljunk ++ L2) \*
+    b ~> `{ buf' := buf;
+            l' := (l:int);
+            r' := (r:int) } ==>
+    b ~> Buf L1 L2 gap.
+  Proof using. intros. xunfolds~ Buf. Qed.
+
+  Implicit Arguments Buf_close [].
+
+  Hint Extern 1 (RegisterOpen (Buf _ _ _)) =>
+    Provide Buf_open.
+  Hint Extern 1 (RegisterClose (record_repr _)) =>
+    Provide Buf_close.
+
 Lemma left_spec : forall b L1 L2 gap,
   app left [b]
     PRE (b ~> Buf L1 L2 gap)
@@ -43,7 +75,13 @@ Lemma left_spec : forall b L1 L2 gap,
       | x :: L1' => b ~> Buf L1' (x :: L2) gap
       end
     ).
+Proof.
+  intros. xcf.
+  xopen b.
 Admitted.
+
+
+
 
 Lemma right_spec : forall b L1 L2 gap,
   app right [b]
