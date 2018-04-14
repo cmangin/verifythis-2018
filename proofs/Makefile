@@ -40,6 +40,7 @@ SOURCES := \
 	pairInsertionSort_funs.ml \
 	challenge1.ml \
 	challenge2.ml \
+	challenge3.ml \
 
 CF := $(PWD)/_cf
 

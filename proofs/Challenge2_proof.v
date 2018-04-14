@@ -56,6 +56,7 @@ Proof.
                         invariant n L0 C ]).
   { math. }
   { do 4 (destruct L as [|? L];  try solve [ false~ ]).
+
     hsimpl (>> (1 :: 1 :: 1 :: 2 :: nil) L
                ((nil :: nil) :: ((B :: nil) :: nil) :: ((B :: B :: nil) :: nil) ::
                              ((B::B::B::nil) :: (R::R::R::nil) :: nil) :: nil)).
