@@ -16,7 +16,7 @@ Open Scope Z_scope.
 Hint Constructors LocallySorted.
 Hint Constructors Permutation.
 Hint Unfold LibListZ.length.
-Ltac auto_tilde ::= rew_list in *; eauto with maths.
+Ltac auto_tilde ::= try unfold LibListZ.length in *; rew_list in *; eauto with maths.
 
 Definition Buf (L1 L2 : list int) gap b :=
   Hexists l r Ljunk buf,
@@ -78,28 +78,20 @@ Proof.
   xapps. xrets. xif; swap 1 2.
   { xret. destruct L1. { xclose~ b. } false~. math. }
   { xapps. xapps. xapps. xapps. xapps. xapps. xapps.
-    { apply~ index_of_inbound. splits~.
-      unfold LibListZ.length. rew_list. math. }
+    { apply~ index_of_inbound. }
     xapps. xapps. xapps.
-    { apply~ index_of_inbound. unfold LibListZ.length.
-      auto_tilde. }
+    { apply~ index_of_inbound. }
     destruct L1. { false~. }
     destruct (last_case Ljunk) as [|HH].
     { subst Ljunk.
-      xchange~ (Buf_close b gap). unfolds~ LibListZ.length.
-      unfolds~ LibListZ.length.
-      rewrite read_middle; swap 1 2.
-      { unfolds~ LibListZ.length. }
-      rewrite~ update_middle. unfolds~ LibListZ.length. }
+      xchange~ (Buf_close b gap); auto_tilde.
+      rewrite~ read_middle. rewrite~ update_middle. }
     { destruct HH as (j & Ljunk' & ?). subst Ljunk.
-      xchange~ (Buf_close b gap (z :: Ljunk')). { unfolds~ LibListZ.length. }
-      unfolds~ LibListZ.length.
-      rewrite read_middle; swap 1 2.
-      { unfolds~ LibListZ.length. }
+      xchange~ (Buf_close b gap (z :: Ljunk')); auto_tilde.
+      rewrite~ read_middle.
       transitivity (((rev L1 ++ z :: Ljunk') ++ j :: L2)[(r - 1)%I:=z]).
-      { rew_list~. }
-      rewrite~ update_middle; swap 1 2.
-      { unfolds~ LibListZ.length. } } }
+      { auto_tilde. }
+      rewrite~ update_middle. }}
 Qed.
 
 Lemma right_spec : forall b L1 L2 gap,
@@ -115,30 +107,22 @@ Proof.
   intros. xcf.
   xopen b. xpull. intros l r Ljunk buf. intros (? & ? & ?).
   xapps. xapps. xapps. xrets. xif; swap 1 2.
-  { xret. destruct L2. { xclose~ b. } false~. unfold LibListZ.length in *.
-    subst r. rew_list in *. math. }
+  { xret. destruct L2. { xclose~ b. } false~. math. }
   { xapps. xapps. xapps.
-    { apply~ index_of_inbound. unfolds~ LibListZ.length.  }
+    { apply~ index_of_inbound. }
     xapps. xapps. xapps.
-    { apply~ index_of_inbound. unfolds~ LibListZ.length.  }
+    { apply~ index_of_inbound. }
     xapps. xapps. xapps. xapps.
-    assert (length L2 <> 0). { unfolds~ LibListZ.length. }
+    asserts~: (length L2 <> 0).
     destruct L2. { false~. }
     destruct Ljunk as [|j Ljunk'].
-    { xchange~ (Buf_close b gap). unfolds~ LibListZ.length.
-      unfolds~ LibListZ.length.
-      rewrite read_middle; swap 1 2.
-      { unfolds~ LibListZ.length. }
-      rewrite~ update_middle. unfolds~ LibListZ.length. }
-    { xchange~ (Buf_close b gap (Ljunk' & z) (z :: L1)).
-      unfolds~ LibListZ.length.
-      rewrite~ update_middle; swap 1 2.
-      { unfolds~ LibListZ.length. }
+    { xchange~ (Buf_close b gap); auto_tilde.
+      rewrite~ read_middle. rewrite~ update_middle. }
+    { xchange~ (Buf_close b gap (Ljunk' & z) (z :: L1)); auto_tilde.
+      rewrite~ update_middle.
       replace (rev L1 ++ j :: Ljunk' ++ z :: L2) with ((rev L1 ++ j :: Ljunk') ++ z :: L2)
                                                       by rew_list~.
-      rewrite read_middle; swap 1 2.
-      { unfolds~ LibListZ.length. }
-      reflexivity. } }
+      rewrite~ read_middle. } }
 Qed.
 
 Lemma insert_spec : forall b x L1 L2 (gap:int),
