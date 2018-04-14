@@ -124,6 +124,34 @@ Proof.
       rewrite~ read_middle. } }
 Qed.
 
+Lemma grow_spec : forall k b L1 L2 gap,
+  app grow [k b]
+    PRE (b ~> Buf L1 L2 gap \* \[ k >= 0 ])
+    POST (fun (tt:unit) => b ~> Buf L1 L2 (gap + k)).
+Proof.
+  intros. xcf.
+
+  xpull.
+  intros Hk.
+
+  xopen b.
+  xpull.
+  intros l r ljunk buf ?.
+  unpack.
+  xapps. xapps. xapp as buf'; only 1: auto_tilde.
+  intros L HL.
+  xapps.
+  xfor_inv (fun (i:int) =>
+    Hexists L',
+      buf' ~> Array L' \* \[
+      forall k, 0 <= k < i -> L'[k] = (rev L1)[k] ] ).
+  - math.
+  - admit.
+  - admit.
+  - admit.
+  Unshelve. exact \[].
+Qed.
+
 Lemma insert_spec : forall b x L1 L2 (gap:int),
   app insert [b x]
     PRE (b ~> Buf L1 L2 gap \* \[gap > 0])
