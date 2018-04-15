@@ -6,15 +6,10 @@ Require Import CFML.Stdlib.Array_proof.
 Require Import CFML.Stdlib.Pervasives_proof.
 Require Import Challenge1_ml.
 
-Require Import TLC.LibInt TLC.LibTactics.
-Require Import TLC.LibList TLC.LibListZ .
-Require Import TLC.LibWf.
-Require Import Sorting Permutation.
+Require Import TLC.LibList TLC.LibListZ.
 
 Open Scope Z_scope.
 
-Hint Constructors LocallySorted.
-Hint Constructors Permutation.
 Ltac auto_tilde ::= try unfold LibListZ.length in *; rew_list in *; eauto with maths.
 
 Definition Buf (L1 L2 : list int) gap b :=
@@ -29,8 +24,16 @@ Definition Buf (L1 L2 : list int) gap b :=
       r = l + gap
     ].
 
-  Lemma Buf_open : forall b L1 L2 gap,
-    b ~> Buf L1 L2 gap ==>
+Definition Buf' (L : list int) (pos : int) b :=
+  Hexists L1 L2 gap,
+    b ~> Buf L1 L2 gap \*
+    \[
+      L = rev L1 ++ L2 /\
+      pos = length L1
+    ].
+
+Lemma Buf_open : forall b L1 L2 gap,
+  b ~> Buf L1 L2 gap ==>
   Hexists l r Ljunk buf,
     b ~> `{ buf' := buf;
             l' := (l:int);
@@ -41,26 +44,26 @@ Definition Buf (L1 L2 : list int) gap b :=
       length Ljunk = gap /\
       r = l + gap
     ].
-  Proof using. intros. xunfolds~ Buf. Qed.
+Proof using. intros. xunfolds~ Buf. Qed.
 
-  Lemma Buf_close : forall b gap Ljunk L1 L2 buf l r L,
-    length L1 = l ->
-    length Ljunk = gap ->
-    r = l + gap ->
-    L = rev L1 ++ Ljunk ++ L2 ->
-    buf ~> Array L \*
-    b ~> `{ buf' := buf;
-            l' := (l:int);
-            r' := (r:int) } ==>
-    b ~> Buf L1 L2 gap.
-  Proof using. intros. xunfolds~ Buf. Qed.
+Lemma Buf_close : forall b gap Ljunk L1 L2 buf l r L,
+  length L1 = l ->
+  length Ljunk = gap ->
+  r = l + gap ->
+  L = rev L1 ++ Ljunk ++ L2 ->
+  buf ~> Array L \*
+  b ~> `{ buf' := buf;
+          l' := (l:int);
+          r' := (r:int) } ==>
+  b ~> Buf L1 L2 gap.
+Proof using. intros. xunfolds~ Buf. Qed.
 
-  Implicit Arguments Buf_close [].
+Implicit Arguments Buf_close [].
 
-  Hint Extern 1 (RegisterOpen (Buf _ _ _)) =>
-    Provide Buf_open.
-  Hint Extern 1 (RegisterClose (record_repr _)) =>
-    Provide Buf_close.
+Hint Extern 1 (RegisterOpen (Buf _ _ _)) =>
+  Provide Buf_open.
+Hint Extern 1 (RegisterClose (record_repr _)) =>
+  Provide Buf_close.
 
 Lemma left_spec : forall b L1 L2 gap,
   app left [b]
@@ -93,6 +96,19 @@ Proof.
       rewrite~ update_middle. }}
 Qed.
 
+Lemma left_spec' : forall b L pos,
+  app left [b]
+    PRE (b ~> Buf' L pos)
+    POST (fun (tt:unit) =>
+      If pos > 0 then b ~> Buf' L (pos - 1) else b ~> Buf' L pos).
+Proof.
+  introv. unfold hdata.
+  unfold Buf'. xpull. intros L1 L2 gap (? & ?).
+  destruct~ L1.
+  { case_if~. { false. math. } xapply~ left_spec. }
+  { case_if~; swap 1 2. { false~. } xapply~ left_spec. }
+Qed.
+
 Lemma right_spec : forall b L1 L2 gap,
   app right [b]
     PRE (b ~> Buf L1 L2 gap)
@@ -122,6 +138,19 @@ Proof.
       replace (rev L1 ++ j :: Ljunk' ++ z :: L2) with ((rev L1 ++ j :: Ljunk') ++ z :: L2)
                                                       by rew_list~.
       rewrite~ read_middle. } }
+Qed.
+
+Lemma right_spec' : forall b L pos,
+  app right [b]
+    PRE (b ~> Buf' L pos)
+    POST (fun (tt:unit) =>
+      If pos < length L then b ~> Buf' L (pos + 1) else b ~> Buf' L pos).
+Proof.
+  introv. unfold hdata.
+  unfold Buf'. xpull. intros L1 L2 gap (? & ?). subst L.
+  destruct~ L2.
+  { case_if~. { false. math. } xapply~ right_spec. }
+  { case_if~; swap 1 2. { false~. } xapply~ right_spec. }
 Qed.
 
 Lemma grow_spec : forall k b L1 L2 gap,
