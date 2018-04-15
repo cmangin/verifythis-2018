@@ -5,7 +5,8 @@ OCAMLBUILD_TARGETS := \
   pairInsertionSort.native \
   pairInsertionSort_funs.native \
 	challenge1.native \
-	challenge2.native
+	challenge2.native \
+	challenge3.native \
 
 .PHONY: all clean
 
